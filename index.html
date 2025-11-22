@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-fa="سامانه ارزیابی سلامت" data-lang-en="Health Assessment System">سامانه ارزیابی سلامت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- متغیرهای اصلی (Default Light Mode - تم پزشکی) --- */
+        :root {
+            --primary-color: #008CBA; 
+            --secondary-color: #5cb85c; 
+            --danger-color: #d9534f; 
+            --bg-color: #eef2f5; 
+            --card-color: #ffffff;
+            --text-color: #2c3e50; 
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --input-border: #bdc3c7;
+        }
+
+        /* --- Dark Mode Variables --- */
+        .dark-mode {
+            --primary-color: #4CAF50; 
+            --secondary-color: #81c784; 
+            --danger-color: #ef9a9a;
+            --bg-color: #1a1a1a;
+            --card-color: #2c2c2c;
+            --text-color: #f0f0f0;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            --input-border: #555;
+        }
+
+        /* --- استایل‌های عمومی --- */
+        body {
+            font-family: 'Vazirmatn', 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .main-container {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 550px; 
+            overflow: hidden;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+
+        /* --- Header/Controls --- */
+        .controls {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid var(--input-border);
+        }
+        .dark-mode .controls { background-color: rgba(255, 255, 255, 0.05); }
+
+        .controls button {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* --- فرم و نتایج --- */
+        .form-section {
+            padding: 30px;
+        }
+
+        input[type="number"], input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        /* استایل خطا */
+        input.input-error {
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        button.primary-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .secondary-btn {
+            background: none;
+            color: var(--primary-color);
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* --- نمودار ریسک (Gauge) --- */
+        #risk-result-container {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        .dark-mode #risk-result-container { background-color: rgba(255, 255, 255, 0.05); }
+
+        .risk-gauge-bar {
+            height: 30px;
+            border-radius: 15px;
+            background-color: var(--input-border);
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .risk-level {
+            height: 100%;
+            width: 0%;
+            transition: width 1.5s ease-out;
+            border-radius: 15px;
+            line-height: 30px;
+            text-align: right;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--secondary-color) 0%, #ffc107 50%, var(--danger-color) 100%); 
+            position: relative;
+        }
+
+        #final-text {
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        /* --- Utility Classes for Language --- */
+        .en-only { display: none; }
+        .fa-only { display: block; }
+
+        body[lang='en'] .en-only { display: block; }
+        body[lang='en'] .fa-only { display: none; }
+        body[lang='en'] { direction: ltr; }
+        body[lang='fa'] { direction: rtl; }
+    </style>
+</head>
+<body lang="fa">
+
+    <div class="main-container">
+        <div class="controls">
+            <button onclick="toggleLanguage()" id="lang-toggle-btn">
+                <span class="fa-only">English / EN</span>
+                <span class="en-only">فارسی / FA</span>
+            </button>
+            <button onclick="toggleTheme()" id="theme-toggle-btn">
+                <span class="fa-only">شب / روز 🌓</span>
+                <span class="en-only">Dark / Light ☀️</span>
+            </button>
+        </div>
+
+        <div id="auth-screen" class="form-section">
+            <h2 id="auth-title" data-lang-fa="ورود به سامانه ارزیابی هوشمند" data-lang-en="Smart Assessment System Login">ورود به سامانه ارزیابی هوشمند</h2>
+            
+            <div class="input-group">
+                <label for="username" data-lang-fa="نام کاربری (۴ تا ۱۰ حرف لاتین):" data-lang-en="Username (4 to 10 Latin letters):">نام کاربری (۴ تا ۱۰ حرف لاتین):</label>
+                <input type="text" id="username" data-placeholder-fa="نام کاربری را وارد کنید" data-placeholder-en="Enter username (letters)" minlength="4" maxlength="10" required>
+            </div>
+            <div class="input-group">
+                <label for="password" data-lang-fa="رمز عبور (۶ تا ۱۰ کاراکتر، شامل حروف و عدد):" data-lang-en="Password (6 to 10 chars, letters/numbers):">رمز عبور (۶ تا ۱۰ کاراکتر، شامل حروف و عدد):</label>
+                <input type="password" id="password" data-placeholder-fa="رمز عبور را وارد کنید" data-placeholder-en="Enter password" minlength="6" maxlength="10" required>
+            </div>
+            
+            <button class="primary-btn" onclick="handleAuth()" id="auth-main-btn" data-lang-fa="ورود" data-lang-en="Login">ورود</button>
+            
+            <button class="secondary-btn" onclick="toggleAuthMode()" id="auth-toggle-btn">
+                <span class="fa-only">حساب کاربری ندارید؟ ثبت نام کنید.</span>
+                <span class="en-only">Don't have an account? Register.</span>
+            </button>
+            
+            <p id="auth-message" style="text-align: center; margin-top: 15px;"></p>
+        </div>
+
+        <div id="prediction-dashboard" class="form-section" style="display: none;">
+            
+            <h2 data-lang-fa="ارزیابی پارامترهای سلامت" data-lang-en="Health Parameters Assessment">ارزیابی پارامترهای سلامت</h2>
+            <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
+                <span class="fa-only">مقادیر زیر را در بازه مجاز و غیرمنفی وارد کنید تا وضعیت شما پیش‌بینی شود.</span>
+                <span class="en-only">Enter the non-negative values within the valid range to get your status predicted.</span>
+            </p>
+            
+            <div class="input-group">
+                <label for="glucose">💉 <span data-lang-fa="گلوکز (Glucose) - mg/dL [10 - 500]:" data-lang-en="Glucose (mg/dL) [10 - 500]:">گلوکز (Glucose) - mg/dL [10 - 500]:</span></label>
+                <input type="number" id="input_glucose" step="1" data-placeholder-fa="مثال: 120" data-placeholder-en="Ex: 120" min="10" max="500" required>
+            </div>
+
+            <div class="input-group">
+                <label for="bmi">⚖️ <span data-lang-fa="شاخص توده بدنی (BMI) [10 - 60]:" data-lang-en="Body Mass Index (BMI) [10 - 60]:">شاخص توده بدنی (BMI) [10 - 60]:</span></label>
+                <input type="number" id="input_bmi" step="0.01" data-placeholder-fa="مثال: 30.5" data-placeholder-en="Ex: 30.5" min="10" max="60" required>
+            </div>
+
+            <div class="input-group">
+                <label for="dpf">🧬 <span data-lang-fa="تابع شجره دیابت (DPF) [0.08 - 2.5]:" data-lang-en="Diabetes Pedigree Function (DPF) [0.08 - 2.5]:">تابع شجره دیابت (DPF) [0.08 - 2.5]:</span></label>
+                <input type="number" id="input_dpf" step="0.001" data-placeholder-fa="مثال: 0.523" data-placeholder-en="Ex: 0.523" min="0.08" max="2.5" required>
+            </div>
+
+            <div class="input-group">
+                <label for="age">🗓️ <span data-lang-fa="سن [1 - 120]:" data-lang-en="Age [1 - 120]:">سن [1 - 120]:</span></label>
+                <input type="number" id="input_age" step="1" data-placeholder-fa="مثال: 35" data-placeholder-en="Ex: 35" min="1" max="120" required>
+            </div>
+
+            <button class="primary-btn" onclick="calculatePrediction()" data-lang-fa="بررسی و نمایش نتایج" data-lang-en="Calculate and View Results">بررسی و نمایش نتایج</button>
+
+            <div id="risk-result-container" style="display: none;">
+                <h4 data-lang-fa="وضعیت ریسک بیماری" data-lang-en="Disease Risk Status">وضعیت ریسک بیماری</h4>
+                <p>
+                    <small style="float: right;">
+                        <span class="fa-only">ریسک پایین (ایمن)</span>
+                        <span class="en-only">Low Risk (Safe)</span>
+                    </small>
+                    <small style="float: left;">
+                        <span class="fa-only">ریسک بالا (خطر)</span>
+                        <span class="en-only">High Risk (Danger)</span>
+                    </small>
+                </p>
+                <div class="risk-gauge-bar">
+                    <div id="risk-level-bar" class="risk-level"></div>
+                </div>
+                
+                <div id="final-text">
+                    <span class="fa-only">لطفاً مقادیر را وارد کرده و محاسبه کنید.</span>
+                    <span class="en-only">Please enter values and calculate.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // -------------------------------------------------------------------
+        // بخش متغیرهای سراسری و پارامترهای معماری
+        // -------------------------------------------------------------------
+        let authMode = 'login';
+        const STORAGE_KEY = 'users_db'; 
+
+        // پارامترهای جدید
+        const USERNAME_MIN_LENGTH = 4; 
+        const USERNAME_MAX_LENGTH = 10;
+        const PASSWORD_MIN_LENGTH = 6; 
+        const PASSWORD_MAX_LENGTH = 10; 
+
+        // -------------------------------------------------------------------
+        // بخش توابع اعتبارسنجی (Validation Functions)
+        // -------------------------------------------------------------------
+
+        // اعتبارسنجی نام کاربری: فقط حروف لاتین، بین 4 تا 10 کاراکتر
+        function validateUsername(value) {
+            // 1. چک کردن طول
+            if (value.length < USERNAME_MIN_LENGTH || value.length > USERNAME_MAX_LENGTH) {
+                return false;
+            }
+            // 2. فقط حروف لاتین (A-Z, a-Z)
+            return /^[a-zA-Z]+$/.test(value); 
+        }
+
+        // اعتبارسنجی رمز عبور: بین 6 تا 10 کاراکتر، شامل حروف و عدد
+        function validatePassword(value) {
+            // 1. چک کردن طول
+            if (value.length < PASSWORD_MIN_LENGTH || value.length > PASSWORD_MAX_LENGTH) {
+                return false;
+            }
+            // 2. چک کردن حداقل یک حرف (لاتین) و حداقل یک عدد
+            // عبارت باقاعده: باید حداقل شامل یک حرف لاتین (?=.*[a-zA-Z]) و حداقل شامل یک عدد (?=.*[0-9]) باشد.
+            const regex = /^(?=.*[a-zA-Z])(?=.*[0-9]).*$/;
+            
+            return regex.test(value);
+        }
+
+        // اعتبارسنجی فیلدهای عددی سلامت (با بازه و عدم پذیرش منفی)
+        function validateHealthField(inputElement) {
+            const value = parseFloat(inputElement.value);
+            const min = parseFloat(inputElement.getAttribute('min'));
+            const max = parseFloat(inputElement.getAttribute('max'));
+            
+            // 1. چک کردن عددی بودن
+            if (isNaN(value)) {
+                return false;
+            }
+            // 2. چک کردن بازه 
+            if (value < min || value > max) {
+                return false;
+            }
+            return true;
+        }
+
+        // -------------------------------------------------------------------
+        // بخش احراز هویت (Authentication)
+        // -------------------------------------------------------------------
+
+        function getUsersDB() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveUsersDB(db) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        }
+
+        function toggleAuthMode() {
+            document.getElementById('auth-message').textContent = '';
+            document.getElementById('username').classList.remove('input-error');
+            document.getElementById('password').classList.remove('input-error');
+            
+            authMode = authMode === 'login' ? 'register' : 'login';
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const lang = document.body.getAttribute('lang');
+            const isFa = lang === 'fa';
+            
+            const title = document.getElementById('auth-title');
+            const mainBtn = document.getElementById('auth-main-btn');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            
+            // به‌روزرسانی متن Labels بر اساس پارامترهای جدید
+            document.querySelector('label[for="username"]').textContent = isFa 
+                ? `نام کاربری (${USERNAME_MIN_LENGTH} تا ${USERNAME_MAX_LENGTH} حرف لاتین):` 
+                : `Username (${USERNAME_MIN_LENGTH} to ${USERNAME_MAX_LENGTH} Latin letters):`;
+            document.querySelector('label[for="password"]').textContent = isFa 
+                ? `رمز عبور (${PASSWORD_MIN_LENGTH} تا ${PASSWORD_MAX_LENGTH} کاراکتر، شامل حروف و عدد):` 
+                : `Password (${PASSWORD_MIN_LENGTH} to ${PASSWORD_MAX_LENGTH} chars, letters/numbers):`;
+
+
+            if (authMode === 'login') {
+                title.textContent = isFa ? 'ورود به سامانه ارزیابی هوشمند' : 'Smart Assessment System Login';
+                mainBtn.textContent = isFa ? 'ورود' : 'Login';
+                toggleBtn.innerHTML = isFa ? 
+                    '<span class="fa-only">حساب کاربری ندارید؟ ثبت نام کنید.</span><span class="en-only">Don\'t have an account? Register.</span>' :
+                    '<span class="fa-only">حساب کاربری ندارید؟ ثبت نام کنید.</span><span class="en-only">Don\'t have an account? Register.</span>';
+            } else { // 'register'
+                title.textContent = isFa ? 'ثبت نام کاربر جدید' : 'New User Registration';
+                mainBtn.textContent = isFa ? 'ثبت نام' : 'Register';
+                toggleBtn.innerHTML = isFa ? 
+                    '<span class="fa-only">قبلاً ثبت نام کرده‌اید؟ ورود کنید.</span><span class="en-only">Already registered? Login.</span>' :
+                    '<span class="fa-only">قبلاً ثبت نام کرده‌اید؟ ورود کنید.</span><span class="en-only">Already registered? Login.</span>';
+            }
+        }
+
+        function handleAuth() {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value; 
+            const msg = document.getElementById('auth-message');
+            const db = getUsersDB();
+            const lang = document.body.getAttribute('lang');
+            
+            msg.style.color = 'var(--danger-color)';
+            usernameInput.classList.remove('input-error');
+            passwordInput.classList.remove('input-error');
+            
+            // اعتبارسنجی نام کاربری
+            if (!validateUsername(username)) {
+                usernameInput.classList.add('input-error');
+                msg.textContent = lang === 'fa' ? 
+                    `نام کاربری باید بین ${USERNAME_MIN_LENGTH} تا ${USERNAME_MAX_LENGTH} کاراکتر و فقط شامل حروف لاتین باشد.` : 
+                    `Username must be between ${USERNAME_MIN_LENGTH} and ${USERNAME_MAX_LENGTH} Latin letters only.`;
+                return;
+            }
+            
+            // اعتبارسنجی رمز عبور
+            if (!validatePassword(password)) {
+                passwordInput.classList.add('input-error');
+                msg.textContent = lang === 'fa' ? 
+                    `رمز عبور باید بین ${PASSWORD_MIN_LENGTH} تا ${PASSWORD_MAX_LENGTH} کاراکتر باشد و حتماً شامل حروف و عدد باشد.` : 
+                    `Password must be between ${PASSWORD_MIN_LENGTH} and ${PASSWORD_MAX_LENGTH} characters and must include both letters and numbers.`;
+                return;
+            }
+
+            // --- ادامه منطق ورود/ثبت نام ---
+            if (authMode === 'login') {
+                if (db[username] && db[username] === password) {
+                    msg.style.color = 'var(--secondary-color)';
+                    msg.textContent = lang === 'fa' ? `ورود موفقیت‌آمیز، خوش آمدید ${username}!` : `Login successful, welcome ${username}!`;
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('prediction-dashboard').style.display = 'block';
+                } else {
+                    msg.textContent = lang === 'fa' ? 'نام کاربری یا رمز عبور اشتباه است.' : 'Incorrect username or password.';
+                }
+            } else {
+                if (db[username]) {
+                    usernameInput.classList.add('input-error');
+                    msg.textContent = lang === 'fa' ? 'این نام کاربری قبلاً ثبت شده است.' : 'This username is already taken.';
+                } else {
+                    db[username] = password;
+                    saveUsersDB(db);
+                    msg.style.color = 'var(--secondary-color)';
+                    msg.textContent = lang === 'fa' ? 'ثبت نام موفقیت‌آمیز. اکنون وارد شوید.' : 'Registration successful. Please login now.';
+                    authMode = 'login';
+                    updateAuthUI();
+                }
+            }
+        }
+
+        // -------------------------------------------------------------------
+        // بخش رابط کاربری و زبان (UI/Language)
+        // -------------------------------------------------------------------
+
+        function setLanguage(lang) {
+            document.body.setAttribute('lang', lang);
+            
+            // 1. تغییر متون غیر Placeholder
+            document.querySelectorAll('[data-lang-fa], [data-lang-en]').forEach(element => {
+                const faText = element.getAttribute('data-lang-fa');
+                const enText = element.getAttribute('data-lang-en');
+                
+                if (lang === 'fa' && faText) {
+                    if (element.tagName.toLowerCase() !== 'label') {
+                        element.textContent = faText;
+                    }
+                } else if (lang === 'en' && enText) {
+                    if (element.tagName.toLowerCase() !== 'label') {
+                        element.textContent = enText;
+                    }
+                }
+            });
+
+            // 2. تغییر Placeholderها
+            document.querySelectorAll('input[type="number"], input[type="text"], input[type="password"]').forEach(input => {
+                const faPlaceholder = input.getAttribute('data-placeholder-fa');
+                const enPlaceholder = input.getAttribute('data-placeholder-en');
+
+                if (lang === 'fa' && faPlaceholder) {
+                    input.setAttribute('placeholder', faPlaceholder);
+                } else if (lang === 'en' && enPlaceholder) {
+                    input.setAttribute('placeholder', enPlaceholder);
+                }
+            });
+            
+            // 3. به‌روزرسانی UI بخش ورود/ثبت نام (شامل لیبل‌ها)
+            updateAuthUI();
+        }
+
+        function toggleLanguage() {
+            const currentLang = document.body.getAttribute('lang');
+            const newLang = currentLang === 'fa' ? 'en' : 'fa';
+            setLanguage(newLang);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+
+        // -------------------------------------------------------------------
+        // بخش ارزیابی سلامت (Assessment)
+        // -------------------------------------------------------------------
+
+        // منطق اصلی قواعد (بدون تغییر)
+        function checkRules(glucose, bmi, age, dpf) {
+            
+            let finalPrediction = 0.0;
+            // Rule 1 for 1.0
+            if (glucose > 101 && glucose <= 154 && bmi > 43.300 && age > 29) { finalPrediction = 1.0; }
+            // Rule 2 for 1.0
+            if (finalPrediction !== 1.0 && glucose > 154) { finalPrediction = 1.0; }
+            // Rule 3 for 1.0
+            if (finalPrediction !== 1.0 && glucose > 101 && bmi > 26.700 && dpf > 0.464 && age > 29) { finalPrediction = 1.0; }
+
+            if (finalPrediction === 1.0) { return 1.0; }
+
+            // Rule 1 for 0.0
+            if (glucose <= 154 && bmi <= 26.700) { finalPrediction = 0.0; }
+            // Rule 2 for 0.0
+            if (finalPrediction !== 0.0 && glucose <= 101) { finalPrediction = 0.0; }
+            // Rule 3 for 0.0
+            if (finalPrediction !== 0.0 && glucose <= 154 && age <= 29) { finalPrediction = 0.0; }
+            // Rule 4 for 0.0
+            if (finalPrediction !== 0.0 && dpf > 0.287 && dpf <= 0.307) { finalPrediction = 0.0; }
+            // Rule 5 for 0.0
+            if (finalPrediction !== 0.0 && glucose <= 154 && bmi <= 43.300 && dpf <= 0.464) { finalPrediction = 0.0; }
+            
+            return finalPrediction; 
+        }
+
+        function updateRiskGauge(prediction) {
+            const riskBar = document.getElementById('risk-level-bar');
+            const finalText = document.getElementById('final-text');
+            const lang = document.body.getAttribute('lang');
+            
+            if (prediction === 1.0) {
+                riskBar.style.width = '90%';
+                riskBar.textContent = lang === 'fa' ? 'خطر بالا' : 'High Risk'; 
+                finalText.innerHTML = lang === 'fa' ? 
+                    '🔴 **ریسک بالا (۱.۰)**: نیاز به مشاوره متخصص.' : 
+                    '🔴 **High Risk (1.0)**: Specialist consultation required.';
+            } else {
+                riskBar.style.width = '20%';
+                riskBar.textContent = lang === 'fa' ? 'ایمن' : 'Safe'; 
+                finalText.innerHTML = lang === 'fa' ? 
+                    '🟢 **ریسک پایین (۰.۰)**: وضعیت خوب ارزیابی شده است.' : 
+                    '🟢 **Low Risk (0.0)**: Status assessed as good.';
+            }
+        }
+
+        function calculatePrediction() {
+            const inputs = {
+                glucose: document.getElementById('input_glucose'),
+                bmi: document.getElementById('input_bmi'),
+                dpf: document.getElementById('input_dpf'),
+                age: document.getElementById('input_age')
+            };
+
+            const resultContainer = document.getElementById('risk-result-container');
+            const finalP = document.getElementById('final-text');
+            const lang = document.body.getAttribute('lang');
+            let allValid = true;
+
+            // 1. اعتبارسنجی فیلدهای سلامت
+            for (const key in inputs) {
+                inputs[key].classList.remove('input-error'); 
+                if (!validateHealthField(inputs[key])) {
+                    inputs[key].classList.add('input-error');
+                    allValid = false;
+                }
+            }
+
+            if (!allValid) {
+                resultContainer.style.display = 'block';
+                const errorMsg = lang === 'fa' ? 
+                    '❌ **خطای ورودی:** لطفاً مقادیر هایلایت شده را در بازه مجاز و غیرمنفی وارد کنید.' : 
+                    '❌ **Input Error:** Please enter the highlighted values as non-negative numbers within the valid range.';
+                finalP.innerHTML = errorMsg;
+                document.getElementById('risk-level-bar').style.width = '0%';
+                document.getElementById('risk-level-bar').textContent = '';
+                return;
+            }
+
+            // 2. اگر همه معتبر بودند، اجرای منطق قواعد
+            const glucose = parseFloat(inputs.glucose.value);
+            const bmi = parseFloat(inputs.bmi.value);
+            const dpf = parseFloat(inputs.dpf.value);
+            const age = parseInt(inputs.age.value);
+
+            const prediction = checkRules(glucose, bmi, age, dpf);
+
+            // 3. نمایش بخش نتایج و نمودار
+            resultContainer.style.display = 'block';
+            updateRiskGauge(prediction);
+        }
+
+        // -------------------------------------------------------------------
+        // بخش راه‌اندازی
+        // -------------------------------------------------------------------
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(document.body.getAttribute('lang'));
+        });
+    </script>
+
+</body>
+</html>
