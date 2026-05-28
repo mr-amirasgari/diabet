@@ -1,602 +1,1416 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-lang-fa="سامانه ارزیابی سلامت" data-lang-en="Health Assessment System">سامانه ارزیابی سلامت</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- متغیرهای اصلی (Default Light Mode - تم پزشکی) --- */
-        :root {
-            --primary-color: #008CBA; 
-            --secondary-color: #5cb85c; 
-            --danger-color: #d9534f; 
-            --bg-color: #eef2f5; 
-            --card-color: #ffffff;
-            --text-color: #2c3e50; 
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --border-radius: 12px;
-            --input-border: #bdc3c7;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>داشبورد پیش بینی دیابت</title>
+  <style>
+    :root {
+      --bg-1: #07111f;
+      --bg-2: #0f172a;
+      --card: rgba(255, 255, 255, 0.10);
+      --card-strong: rgba(255, 255, 255, 0.15);
+      --white: #ffffff;
+      --text: #f8fafc;
+      --muted: #a7b4c7;
+      --muted-2: #718096;
+      --border: rgba(255, 255, 255, 0.16);
+      --dark: #020617;
+      --green: #22c55e;
+      --green-2: #10b981;
+      --red: #fb7185;
+      --red-2: #ef4444;
+      --cyan: #22d3ee;
+      --blue: #60a5fa;
+      --violet: #8b5cf6;
+      --amber: #fbbf24;
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.36);
+      --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.24);
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+    }
 
-        /* --- Dark Mode Variables --- */
-        .dark-mode {
-            --primary-color: #4CAF50; 
-            --secondary-color: #81c784; 
-            --danger-color: #ef9a9a;
-            --bg-color: #1a1a1a;
-            --card-color: #2c2c2c;
-            --text-color: #f0f0f0;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-            --input-border: #555;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* --- استایل‌های عمومی --- */
-        body {
-            font-family: 'Vazirmatn', 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            transition: background-color 0.5s, color 0.5s;
-        }
+    html {
+      scroll-behavior: smooth;
+    }
 
-        .main-container {
-            background-color: var(--card-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 550px; 
-            overflow: hidden;
-            border-top: 5px solid var(--primary-color);
-        }
+    body {
+      min-height: 100vh;
+      font-family: Tahoma, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 12%, rgba(251, 113, 133, 0.34), transparent 25%),
+        radial-gradient(circle at 88% 8%, rgba(34, 211, 238, 0.30), transparent 26%),
+        radial-gradient(circle at 52% 95%, rgba(34, 197, 94, 0.22), transparent 28%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2) 50%, #111827);
+      overflow-x: hidden;
+    }
 
-        h2 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            font-weight: 900;
-        }
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 420px;
+      height: 420px;
+      border-radius: 999px;
+      pointer-events: none;
+      filter: blur(40px);
+      opacity: 0.32;
+      z-index: -1;
+      animation: floatBlob 9s ease-in-out infinite alternate;
+    }
 
-        /* --- Header/Controls --- */
-        .controls {
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            background-color: rgba(0, 0, 0, 0.03);
-            border-bottom: 1px solid var(--input-border);
-        }
-        .dark-mode .controls { background-color: rgba(255, 255, 255, 0.05); }
+    body::before {
+      right: -140px;
+      top: 120px;
+      background: var(--cyan);
+    }
 
-        .controls button {
-            background: none;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s;
-        }
+    body::after {
+      left: -150px;
+      bottom: 80px;
+      background: var(--red);
+      animation-delay: 1.6s;
+    }
 
-        .controls button:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
+    @keyframes floatBlob {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(24px, -34px, 0) scale(1.12); }
+    }
 
-        /* --- فرم و نتایج --- */
-        .form-section {
-            padding: 30px;
-        }
+    button,
+    input {
+      font-family: inherit;
+    }
 
-        input[type="number"], input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-            background-color: var(--card-color);
-            color: var(--text-color);
-            margin-bottom: 20px;
-            transition: border-color 0.3s;
-        }
-        /* استایل خطا */
-        input.input-error {
-            border-color: var(--danger-color) !important;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-        }
+    button {
+      user-select: none;
+    }
 
-        button.primary-btn {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 700;
-            margin-top: 10px;
-        }
+    .app {
+      width: min(1280px, calc(100% - 34px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
 
-        .secondary-btn {
-            background: none;
-            color: var(--primary-color);
-            border: none;
-            cursor: pointer;
-            font-size: 0.9em;
-            margin-top: 10px;
-            display: block;
-            width: 100%;
-            text-align: center;
-        }
+    .glass {
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.075));
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+      box-shadow: var(--shadow-soft);
+    }
 
-        /* --- نمودار ریسک (Gauge) --- */
-        #risk-result-container {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.03);
-        }
-        .dark-mode #risk-result-container { background-color: rgba(255, 255, 255, 0.05); }
+    .header {
+      position: sticky;
+      top: 18px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 18px;
+      border-radius: 32px;
+      margin-bottom: 24px;
+    }
 
-        .risk-gauge-bar {
-            height: 30px;
-            border-radius: 15px;
-            background-color: var(--input-border);
-            overflow: hidden;
-            margin-top: 10px;
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
 
-        .risk-level {
-            height: 100%;
-            width: 0%;
-            transition: width 1.5s ease-out;
-            border-radius: 15px;
-            line-height: 30px;
-            text-align: right;
-            padding-right: 10px;
-            color: white;
-            font-weight: bold;
-            background: linear-gradient(to right, var(--secondary-color) 0%, #ffc107 50%, var(--danger-color) 100%); 
-            position: relative;
-        }
+    .brand-icon {
+      position: relative;
+      width: 66px;
+      height: 66px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.92), rgba(139, 92, 246, 0.92) 52%, rgba(251, 113, 133, 0.92));
+      border-radius: 24px;
+      font-size: 31px;
+      box-shadow: 0 24px 55px rgba(34, 211, 238, 0.22);
+      overflow: hidden;
+    }
 
-        #final-text {
-            margin-top: 15px;
-            font-size: 1.2em;
-            font-weight: 700;
-        }
+    .brand-icon::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      border-radius: 20px;
+    }
 
-        /* --- Utility Classes for Language --- */
-        .en-only { display: none; }
-        .fa-only { display: block; }
+    h1 {
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.22;
+      letter-spacing: -1.2px;
+      font-weight: 950;
+      color: var(--text);
+      text-shadow: 0 16px 50px rgba(255, 255, 255, 0.10);
+    }
 
-        body[lang='en'] .en-only { display: block; }
-        body[lang='en'] .fa-only { display: none; }
-        body[lang='en'] { direction: ltr; }
-        body[lang='fa'] { direction: rtl; }
-    </style>
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tab-btn,
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      cursor: pointer;
+      border-radius: 18px;
+      padding: 13px 18px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #dbeafe;
+      background: rgba(255, 255, 255, 0.08);
+      transition: 0.25s ease;
+    }
+
+    .tab-btn:hover,
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    .tab-btn.active,
+    .btn.primary {
+      color: #06111f;
+      border-color: transparent;
+      background: linear-gradient(135deg, #67e8f9, #a7f3d0);
+      box-shadow: 0 16px 45px rgba(34, 211, 238, 0.20);
+    }
+
+    .section {
+      display: none;
+      animation: fadeUp 0.42s ease both;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dashboard-shell {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+
+    .form-panel,
+    .hero-panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 38px;
+      padding: 24px;
+    }
+
+    .form-panel::before,
+    .hero-panel::before,
+    .result-card::before,
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.20), transparent 34%, rgba(255, 255, 255, 0.06));
+      opacity: 0.85;
+    }
+
+    .panel > *,
+    .form-panel > *,
+    .hero-panel > *,
+    .result-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34, 211, 238, 0.18);
+      color: #a5f3fc;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .form-title {
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 950;
+      letter-spacing: -0.8px;
+      margin-bottom: 8px;
+    }
+
+    .form-subtitle {
+      color: var(--muted);
+      line-height: 2;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .input-card {
+      position: relative;
+      padding: 18px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+      overflow: hidden;
+      transition: 0.25s ease;
+    }
+
+    .input-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -30% -70% -30%;
+      height: 120px;
+      background: radial-gradient(circle, rgba(34, 211, 238, 0.18), transparent 65%);
+      opacity: 0;
+      transition: 0.25s ease;
+    }
+
+    .input-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(103, 232, 249, 0.34);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.26);
+    }
+
+    .input-card:hover::after {
+      opacity: 1;
+    }
+
+    .input-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .input-title {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .field-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      color: #06111f;
+      background: linear-gradient(135deg, #67e8f9, #bef264);
+      border-radius: 18px;
+      font-size: 20px;
+      font-weight: 950;
+      box-shadow: 0 16px 34px rgba(34, 211, 238, 0.16);
+    }
+
+    .input-title strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 950;
+      color: #f8fafc;
+    }
+
+    .input-title span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .unit {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .input-card input {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      outline: none;
+      border-radius: 20px;
+      padding: 15px 16px;
+      color: white;
+      background: rgba(2, 6, 23, 0.42);
+      font-size: 19px;
+      font-weight: 950;
+      direction: ltr;
+      text-align: left;
+      transition: 0.18s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .input-card input::placeholder {
+      color: rgba(203, 213, 225, 0.42);
+      font-weight: 800;
+    }
+
+    .input-card input:focus {
+      border-color: rgba(103, 232, 249, 0.85);
+      box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      background: rgba(2, 6, 23, 0.58);
+    }
+
+    .helper-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .progress {
+      position: relative;
+      z-index: 1;
+      height: 8px;
+      border-radius: 999px;
+      margin-top: 10px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      transition: width 0.45s ease;
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.38);
+    }
+
+    .progress.danger span {
+      background: linear-gradient(90deg, #f59e0b, var(--red));
+      box-shadow: 0 0 18px rgba(251, 113, 133, 0.36);
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .ghost-text {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.9;
+    }
+
+    .hero-panel {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(145deg, rgba(34, 211, 238, 0.16), rgba(139, 92, 246, 0.10) 45%, rgba(251, 113, 133, 0.13)),
+        rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-orb {
+      width: min(240px, 70vw);
+      aspect-ratio: 1;
+      margin: 8px auto 18px;
+      border-radius: 50%;
+      position: relative;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.90), transparent 11%),
+        radial-gradient(circle at 45% 45%, rgba(34, 211, 238, 0.80), rgba(139, 92, 246, 0.58) 48%, rgba(251, 113, 133, 0.66));
+      box-shadow:
+        0 0 70px rgba(34, 211, 238, 0.20),
+        0 34px 90px rgba(0, 0, 0, 0.34);
+      animation: pulseOrb 4.5s ease-in-out infinite alternate;
+    }
+
+    .hero-orb::before,
+    .hero-orb::after {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+    }
+
+    .hero-orb::after {
+      inset: -14px;
+      border-color: rgba(34, 211, 238, 0.24);
+      border-style: dashed;
+      animation: rotateOrb 16s linear infinite;
+    }
+
+    @keyframes pulseOrb {
+      from { transform: translateY(0) scale(1); }
+      to { transform: translateY(-8px) scale(1.035); }
+    }
+
+    @keyframes rotateOrb {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-panel h2 {
+      font-size: clamp(25px, 3vw, 38px);
+      line-height: 1.55;
+      font-weight: 950;
+      letter-spacing: -0.8px;
+    }
+
+    .hero-panel p {
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 2.1;
+      font-size: 13px;
+    }
+
+    .hero-points {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .hero-point {
+      padding: 13px;
+      border-radius: 19px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      color: #e2e8f0;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: center;
+      padding: 28px;
+      border-radius: 38px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+      animation: popIn 0.42s ease both;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .result-card.low {
+      border: 1px solid rgba(34, 197, 94, 0.26);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(34, 197, 94, 0.26), transparent 26%),
+        linear-gradient(135deg, rgba(20, 83, 45, 0.60), rgba(15, 23, 42, 0.90) 52%, rgba(8, 47, 73, 0.78));
+    }
+
+    .result-card.high {
+      border: 1px solid rgba(251, 113, 133, 0.30);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(251, 113, 133, 0.28), transparent 27%),
+        linear-gradient(135deg, rgba(127, 29, 29, 0.64), rgba(15, 23, 42, 0.92) 54%, rgba(88, 28, 135, 0.55));
+    }
+
+    .result-title {
+      font-size: clamp(30px, 5vw, 58px);
+      line-height: 1.25;
+      font-weight: 950;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+
+    .result-badge {
+      width: 210px;
+      height: 210px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: white;
+      border-radius: 40px;
+      background:
+        linear-gradient(135deg, rgba(34, 197, 94, 1), rgba(34, 211, 238, 0.92));
+      box-shadow: 0 28px 70px rgba(34, 197, 94, 0.26);
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .result-card.high .result-badge {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 1), rgba(251, 113, 133, 0.94));
+      box-shadow: 0 28px 70px rgba(251, 113, 133, 0.24);
+    }
+
+    .result-number {
+      display: block;
+      font-size: clamp(27px, 4vw, 40px);
+      line-height: 1.45;
+      font-weight: 950;
+      text-shadow: 0 14px 35px rgba(0, 0, 0, 0.20);
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .mini-value {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .mini-value small {
+      color: var(--muted);
+      font-weight: 900;
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .mini-value strong {
+      font-size: 24px;
+      direction: ltr;
+      display: block;
+      text-align: right;
+      color: white;
+    }
+
+    .matched-box {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(2, 6, 23, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .matched-box h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      font-weight: 950;
+    }
+
+    .matched-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .matched-list span {
+      color: #06111f;
+      background: linear-gradient(135deg, #67e8f9, #bef264);
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 30px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title h2,
+    .rule-toolbar h2 {
+      font-size: 24px;
+      font-weight: 950;
+      color: white;
+    }
+
+    .panel-title p,
+    .hint {
+      color: var(--muted);
+      margin-top: 7px;
+      line-height: 1.9;
+      font-size: 13px;
+    }
+
+    .notice {
+      background:
+        linear-gradient(135deg, rgba(251, 191, 36, 0.16), rgba(255, 255, 255, 0.07));
+      border: 1px solid rgba(251, 191, 36, 0.20);
+    }
+
+    .notice h2 {
+      color: #fde68a;
+      font-size: 22px;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+
+    .notice p {
+      color: rgba(254, 243, 199, 0.78);
+      line-height: 2.1;
+    }
+
+    #calculator .dashboard-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .top-notice {
+      padding: 10px 16px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    .top-notice h2 {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .top-notice p {
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .rule-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .search-box {
+      width: min(340px, 100%);
+    }
+
+    .search-box input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 18px;
+      color: white;
+      background: rgba(2, 6, 23, 0.40);
+      padding: 14px 16px;
+      outline: none;
+      font-weight: 850;
+    }
+
+    .search-box input::placeholder {
+      color: rgba(203, 213, 225, 0.44);
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .rule-card {
+      padding: 20px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-soft);
+      transition: 0.22s ease;
+    }
+
+    .rule-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(103, 232, 249, 0.26);
+    }
+
+    .rule-card.matched.positive {
+      background: linear-gradient(145deg, rgba(251, 113, 133, 0.24), rgba(255, 255, 255, 0.07));
+      border-color: rgba(251, 113, 133, 0.28);
+    }
+
+    .rule-card.matched.negative {
+      background: linear-gradient(145deg, rgba(34, 197, 94, 0.20), rgba(255, 255, 255, 0.07));
+      border-color: rgba(34, 197, 94, 0.27);
+    }
+
+    .rule-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .rule-top h3 {
+      font-size: 17px;
+      font-weight: 950;
+      color: white;
+    }
+
+    .rule-top p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .rule-output {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+      color: #dbeafe;
+      font-size: 11px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .condition {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      padding: 11px 12px;
+      border-radius: 17px;
+      background: rgba(2, 6, 23, 0.26);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
+      font-weight: 850;
+      direction: ltr;
+      text-align: left;
+      color: #dbeafe;
+    }
+
+    .condition.ok {
+      background: rgba(16, 185, 129, 0.14);
+      color: #bbf7d0;
+      border-color: rgba(16, 185, 129, 0.16);
+    }
+
+    .condition.fail {
+      color: #94a3b8;
+    }
+
+    .condition .status {
+      direction: rtl;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .status.ok {
+      color: #86efac;
+    }
+
+    .status.fail {
+      color: #94a3b8;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 30px;
+    }
+
+    .stat::after {
+      content: "";
+      position: absolute;
+      left: -40px;
+      bottom: -50px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(34, 211, 238, 0.16);
+      filter: blur(8px);
+    }
+
+    .stat p {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+      margin-bottom: 9px;
+    }
+
+    .stat strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      font-size: 36px;
+      font-weight: 950;
+      color: white;
+    }
+
+    .stat small {
+      position: relative;
+      z-index: 1;
+      display: block;
+      color: var(--muted);
+      margin-top: 7px;
+      line-height: 1.8;
+    }
+
+    .logic-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .logic-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      line-height: 2;
+      color: #dbeafe;
+      font-weight: 760;
+    }
+
+    .logic-item span {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: #06111f;
+      background: linear-gradient(135deg, #67e8f9, #bef264);
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 46px;
+      text-align: center;
+      border-radius: 30px;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-shell,
+      .result-card,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        width: min(100% - 18px, 1280px);
+        padding-top: 10px;
+      }
+
+      .brand {
+        align-items: flex-start;
+      }
+
+      .brand-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 20px;
+        font-size: 24px;
+      }
+
+      .tabs,
+      .rule-toolbar,
+      .panel-title,
+      .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .tab-btn,
+      .btn {
+        width: 100%;
+      }
+
+      .input-grid,
+      .value-grid,
+      .rules-grid,
+      .stats-grid,
+      .hero-points {
+        grid-template-columns: 1fr;
+      }
+
+      .form-panel,
+      .hero-panel,
+      .result-card {
+        padding: 20px;
+        border-radius: 30px;
+      }
+
+      .result-badge {
+        width: 100%;
+        height: auto;
+        min-height: 140px;
+      }
+    }
+  </style>
 </head>
-<body lang="fa">
+<body>
+  <main class="app">
+    <header class="header glass">
+      <div class="brand">
+        <div class="brand-icon">⚕</div>
+        <h1>داشبورد پیش بینی دیابت</h1>
+      </div>
 
-    <div class="main-container">
-        <div class="controls">
-            <button onclick="toggleLanguage()" id="lang-toggle-btn">
-                <span class="fa-only">English / EN</span>
-                <span class="en-only">فارسی / FA</span>
-            </button>
-            <button onclick="toggleTheme()" id="theme-toggle-btn">
-                <span class="fa-only">شب / روز 🌓</span>
-                <span class="en-only">Dark / Light ☀️</span>
-            </button>
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="calculator">محاسبه</button>
+        <button class="tab-btn" data-tab="rules">قوانین</button>
+        <button class="tab-btn" data-tab="insights">خلاصه</button>
+      </nav>
+    </header>
+
+    <section id="calculator" class="section active">
+      <div class="panel notice glass top-notice">
+        <h2>نکته مهم</h2>
+        <p>این رابط فقط پیاده‌سازی قوانین داده‌شده است و جایگزین تشخیص یا مشاوره پزشکی نیست.</p>
+      </div>
+
+      <div class="dashboard-shell">
+        <div class="form-panel glass">
+          <div class="section-kicker">ورود اطلاعات بیمار</div>
+          <h2 class="form-title">مقادیر را وارد کنید</h2>
+          <p class="form-subtitle">پس از تکمیل هر چهار فیلد، خروجی مدل به‌صورت خودکار پایین فرم نمایش داده می‌شود.</p>
+
+          <div class="input-grid">
+            <article class="input-card">
+              <div class="input-head">
+                <div class="input-title"><div class="field-icon">G</div><div><strong>گلوکز</strong><span>Glucose</span></div></div>
+                <span class="unit">mg/dL</span>
+              </div>
+              <input id="glucose" type="number" value="" step="1" min="0" max="220" placeholder="عدد گلوکز را وارد کنید">
+              <div class="helper-row"><span>مقدار قند خون</span><span id="glucoseValue">—</span></div>
+              <div class="progress danger"><span id="glucoseBar"></span></div>
+            </article>
+
+            <article class="input-card">
+              <div class="input-head">
+                <div class="input-title"><div class="field-icon">B</div><div><strong>شاخص توده بدنی</strong><span>BMI</span></div></div>
+                <span class="unit">kg/m²</span>
+              </div>
+              <input id="bmi" type="number" value="" step="0.1" min="0" max="70" placeholder="عدد BMI را وارد کنید">
+              <div class="helper-row"><span>شاخص BMI فرد</span><span id="bmiValue">—</span></div>
+              <div class="progress danger"><span id="bmiBar"></span></div>
+            </article>
+
+            <article class="input-card">
+              <div class="input-head">
+                <div class="input-title"><div class="field-icon">A</div><div><strong>سن</strong><span>Age</span></div></div>
+                <span class="unit">سال</span>
+              </div>
+              <input id="age" type="number" value="" step="1" min="0" max="110" placeholder="سن را وارد کنید">
+              <div class="helper-row"><span>سن فرد</span><span id="ageValue">—</span></div>
+              <div class="progress"><span id="ageBar"></span></div>
+            </article>
+
+            <article class="input-card">
+              <div class="input-head">
+                <div class="input-title"><div class="field-icon">D</div><div><strong>سابقه خانوادگی</strong><span>DiabetesPedigreeFunction</span></div></div>
+                <span class="unit">DPF</span>
+              </div>
+              <input id="dpf" type="number" value="" step="0.001" min="0" max="2.5" placeholder="عدد DPF را وارد کنید">
+              <div class="helper-row"><span>شاخص سابقه خانوادگی</span><span id="dpfValue">—</span></div>
+              <div class="progress"><span id="dpfBar"></span></div>
+            </article>
+          </div>
+
+          <div class="form-actions">
+            <p class="ghost-text">نتیجه فقط بعد از وارد کردن کامل اطلاعات نمایش داده می‌شود.</p>
+            <button id="clearBtn" class="btn">پاک‌کردن ورودی‌ها</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="resultCard" class="result-card low" style="display: none;">
+        <div>
+          <h2 id="resultTitle" class="result-title">خروجی مدل</h2>
+
+          <div class="value-grid">
+            <div class="mini-value"><small>گلوکز</small><strong id="miniGlucose">—</strong></div>
+            <div class="mini-value"><small>BMI</small><strong id="miniBmi">—</strong></div>
+            <div class="mini-value"><small>سن</small><strong id="miniAge">—</strong></div>
+            <div class="mini-value"><small>DPF</small><strong id="miniDpf">—</strong></div>
+          </div>
+
+          <div class="matched-box">
+            <h3>قوانین فعال‌شده</h3>
+            <div id="matchedList" class="matched-list"></div>
+          </div>
         </div>
 
-        <div id="auth-screen" class="form-section">
-            <h2 id="auth-title" data-lang-fa="ورود به سامانه ارزیابی هوشمند" data-lang-en="Smart Assessment System Login">ورود به سامانه ارزیابی هوشمند</h2>
-            
-            <div class="input-group">
-                <label for="username" data-lang-fa="نام کاربری (۴ تا ۱۰ حرف لاتین):" data-lang-en="Username (4 to 10 Latin letters):">نام کاربری (۴ تا ۱۰ حرف لاتین):</label>
-                <input type="text" id="username" data-placeholder-fa="نام کاربری را وارد کنید" data-placeholder-en="Enter username (letters)" minlength="4" maxlength="10" required>
-            </div>
-            <div class="input-group">
-                <label for="password" data-lang-fa="رمز عبور (۶ تا ۱۰ کاراکتر، شامل حروف و عدد):" data-lang-en="Password (6 to 10 chars, letters/numbers):">رمز عبور (۶ تا ۱۰ کاراکتر، شامل حروف و عدد):</label>
-                <input type="password" id="password" data-placeholder-fa="رمز عبور را وارد کنید" data-placeholder-en="Enter password" minlength="6" maxlength="10" required>
-            </div>
-            
-            <button class="primary-btn" onclick="handleAuth()" id="auth-main-btn" data-lang-fa="ورود" data-lang-en="Login">ورود</button>
-            
-            <button class="secondary-btn" onclick="toggleAuthMode()" id="auth-toggle-btn">
-                <span class="fa-only">حساب کاربری ندارید؟ ثبت نام کنید.</span>
-                <span class="en-only">Don't have an account? Register.</span>
-            </button>
-            
-            <p id="auth-message" style="text-align: center; margin-top: 15px;"></p>
+        <div id="resultBadge" class="result-badge">
+          <span id="resultNumber" class="result-number">دیابت ندارد</span>
         </div>
+      </div>
 
-        <div id="prediction-dashboard" class="form-section" style="display: none;">
-            
-            <h2 data-lang-fa="ارزیابی پارامترهای سلامت" data-lang-en="Health Parameters Assessment">ارزیابی پارامترهای سلامت</h2>
-            <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
-                <span class="fa-only">مقادیر زیر را در بازه مجاز و غیرمنفی وارد کنید تا وضعیت شما پیش‌بینی شود.</span>
-                <span class="en-only">Enter the non-negative values within the valid range to get your status predicted.</span>
-            </p>
-            
-            <div class="input-group">
-                <label for="glucose">💉 <span data-lang-fa="گلوکز (Glucose) - mg/dL [10 - 500]:" data-lang-en="Glucose (mg/dL) [10 - 500]:">گلوکز (Glucose) - mg/dL [10 - 500]:</span></label>
-                <input type="number" id="input_glucose" step="1" data-placeholder-fa="مثال: 120" data-placeholder-en="Ex: 120" min="10" max="500" required>
-            </div>
+    </section>
 
-            <div class="input-group">
-                <label for="bmi">⚖️ <span data-lang-fa="شاخص توده بدنی (BMI) [10 - 60]:" data-lang-en="Body Mass Index (BMI) [10 - 60]:">شاخص توده بدنی (BMI) [10 - 60]:</span></label>
-                <input type="number" id="input_bmi" step="0.01" data-placeholder-fa="مثال: 30.5" data-placeholder-en="Ex: 30.5" min="10" max="60" required>
-            </div>
-
-            <div class="input-group">
-                <label for="dpf">🧬 <span data-lang-fa="تابع شجره دیابت (DPF) [0.08 - 2.5]:" data-lang-en="Diabetes Pedigree Function (DPF) [0.08 - 2.5]:">تابع شجره دیابت (DPF) [0.08 - 2.5]:</span></label>
-                <input type="number" id="input_dpf" step="0.001" data-placeholder-fa="مثال: 0.523" data-placeholder-en="Ex: 0.523" min="0.08" max="2.5" required>
-            </div>
-
-            <div class="input-group">
-                <label for="age">🗓️ <span data-lang-fa="سن [1 - 120]:" data-lang-en="Age [1 - 120]:">سن [1 - 120]:</span></label>
-                <input type="number" id="input_age" step="1" data-placeholder-fa="مثال: 35" data-placeholder-en="Ex: 35" min="1" max="120" required>
-            </div>
-
-            <button class="primary-btn" onclick="calculatePrediction()" data-lang-fa="بررسی و نمایش نتایج" data-lang-en="Calculate and View Results">بررسی و نمایش نتایج</button>
-
-            <div id="risk-result-container" style="display: none;">
-                <h4 data-lang-fa="وضعیت ریسک بیماری" data-lang-en="Disease Risk Status">وضعیت ریسک بیماری</h4>
-                <p>
-                    <small style="float: right;">
-                        <span class="fa-only">ریسک پایین (ایمن)</span>
-                        <span class="en-only">Low Risk (Safe)</span>
-                    </small>
-                    <small style="float: left;">
-                        <span class="fa-only">ریسک بالا (خطر)</span>
-                        <span class="en-only">High Risk (Danger)</span>
-                    </small>
-                </p>
-                <div class="risk-gauge-bar">
-                    <div id="risk-level-bar" class="risk-level"></div>
-                </div>
-                
-                <div id="final-text">
-                    <span class="fa-only">لطفاً مقادیر را وارد کرده و محاسبه کنید.</span>
-                    <span class="en-only">Please enter values and calculate.</span>
-                </div>
-            </div>
+    <section id="rules" class="section">
+      <div class="panel glass">
+        <div class="rule-toolbar">
+          <div>
+            <h2>کتابخانه قوانین</h2>
+            <p class="hint">قوانین مثبت اول بررسی می‌شوند؛ سپس قوانین منفی و در نهایت مقدار پیش‌فرض صفر اعمال می‌شود.</p>
+          </div>
+          <div class="tabs">
+            <div class="search-box"><input id="ruleSearch" type="text" placeholder="جستجو در قوانین..."></div>
+            <button id="onlyMatchedBtn" class="btn">فقط قوانین فعال</button>
+          </div>
         </div>
-    </div>
-    
-    <script>
-        // -------------------------------------------------------------------
-        // بخش متغیرهای سراسری و پارامترهای معماری
-        // -------------------------------------------------------------------
-        let authMode = 'login';
-        const STORAGE_KEY = 'users_db'; 
+        <div id="rulesGrid" class="rules-grid"></div>
+        <div id="emptyState" class="empty-state">هیچ قانونی با این فیلتر پیدا نشد.</div>
+      </div>
+    </section>
 
-        // پارامترهای جدید
-        const USERNAME_MIN_LENGTH = 4; 
-        const USERNAME_MAX_LENGTH = 10;
-        const PASSWORD_MIN_LENGTH = 6; 
-        const PASSWORD_MAX_LENGTH = 10; 
+    <section id="insights" class="section">
+      <div class="stats-grid">
+        <div class="stat glass"><p>تعداد کل قوانین</p><strong>۸</strong><small>۳ قانون برای دیابت دارد + ۵ قانون برای دیابت ندارد</small></div>
+        <div class="stat glass"><p>قوانین دیابت دارد</p><strong>۳</strong><small>اولویت در تصمیم نهایی</small></div>
+        <div class="stat glass"><p>قوانین دیابت ندارد</p><strong>۵</strong><small>در نبود خروجی مثبت اعمال می‌شوند</small></div>
+        <div class="stat glass"><p>ویژگی‌ها</p><strong>۴</strong><small>Glucose, BMI, Age, DPF</small></div>
+      </div>
 
-        // -------------------------------------------------------------------
-        // بخش توابع اعتبارسنجی (Validation Functions)
-        // -------------------------------------------------------------------
+      <div class="two-col">
+        <div class="panel glass">
+          <div class="panel-title"><div><h2>منطق تصمیم</h2><p>ساده، قابل توضیح و قابل تست</p></div></div>
+          <div class="logic-list">
+            <div class="logic-item"><span>۱</span>ابتدا تمام قوانین مثبت بررسی می‌شوند.</div>
+            <div class="logic-item"><span>۲</span>اگر حتی یک قانون مثبت برقرار باشد، خروجی «دیابت دارد» می‌شود.</div>
+            <div class="logic-item"><span>۳</span>اگر هیچ قانون مثبت برقرار نباشد، قوانین منفی بررسی می‌شوند.</div>
+            <div class="logic-item"><span>۴</span>اگر هیچ قانونی برقرار نباشد، خروجی «دیابت ندارد» است.</div>
+          </div>
+        </div>
+        <div class="panel glass">
+          <div class="panel-title"><div><h2>نمای سریع قوانین</h2><p>در تب قوانین می‌توانی وضعیت هر شرط را زنده ببینی.</p></div></div>
+          <div id="quickRules" class="rules-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-        // اعتبارسنجی نام کاربری: فقط حروف لاتین، بین 4 تا 10 کاراکتر
-        function validateUsername(value) {
-            // 1. چک کردن طول
-            if (value.length < USERNAME_MIN_LENGTH || value.length > USERNAME_MAX_LENGTH) {
-                return false;
-            }
-            // 2. فقط حروف لاتین (A-Z, a-Z)
-            return /^[a-zA-Z]+$/.test(value); 
+  <script>
+    const positiveRules = [
+      { id: 'P1', title: 'قانون ۱', output: 1, badge: 'دیابت دارد', conditions: [
+        ['glucose', 'Glucose', '>', 101], ['glucose', 'Glucose', '<=', 154], ['bmi', 'BMI', '>', 43.3], ['age', 'Age', '>', 29]
+      ]},
+      { id: 'P2', title: 'قانون ۲', output: 1, badge: 'دیابت دارد', conditions: [
+        ['glucose', 'Glucose', '>', 154]
+      ]},
+      { id: 'P3', title: 'قانون ۳', output: 1, badge: 'دیابت دارد', conditions: [
+        ['glucose', 'Glucose', '>', 101], ['bmi', 'BMI', '>', 26.7], ['dpf', 'DiabetesPedigreeFunction', '>', 0.464], ['age', 'Age', '>', 29]
+      ]}
+    ];
+
+    const negativeRules = [
+      { id: 'N1', title: 'قانون ۱', output: 0, badge: 'دیابت ندارد', conditions: [
+        ['glucose', 'Glucose', '<=', 154], ['bmi', 'BMI', '<=', 26.7]
+      ]},
+      { id: 'N2', title: 'قانون ۲', output: 0, badge: 'دیابت ندارد', conditions: [
+        ['glucose', 'Glucose', '<=', 101]
+      ]},
+      { id: 'N3', title: 'قانون ۳', output: 0, badge: 'دیابت ندارد', conditions: [
+        ['glucose', 'Glucose', '<=', 154], ['age', 'Age', '<=', 29]
+      ]},
+      { id: 'N4', title: 'قانون ۴', output: 0, badge: 'دیابت ندارد', conditions: [
+        ['dpf', 'DiabetesPedigreeFunction', '>', 0.287], ['dpf', 'DiabetesPedigreeFunction', '<=', 0.307]
+      ]},
+      { id: 'N5', title: 'قانون ۵', output: 0, badge: 'دیابت ندارد', conditions: [
+        ['glucose', 'Glucose', '<=', 154], ['bmi', 'BMI', '<=', 43.3], ['dpf', 'DiabetesPedigreeFunction', '<=', 0.464]
+      ]}
+    ];
+
+    const allRules = [...positiveRules, ...negativeRules];
+    const inputIds = ['glucose', 'bmi', 'age', 'dpf'];
+    let onlyMatched = false;
+
+    const fieldLimits = {
+      glucose: { min: 0, max: 220 },
+      bmi: { min: 0, max: 70 },
+      age: { min: 0, max: 110 },
+      dpf: { min: 0, max: 2.5 }
+    };
+
+    function getValues() {
+      return {
+        glucose: Number(document.getElementById('glucose').value),
+        bmi: Number(document.getElementById('bmi').value),
+        age: Number(document.getElementById('age').value),
+        dpf: Number(document.getElementById('dpf').value)
+      };
+    }
+
+    function compare(value, op, threshold) {
+      if (Number.isNaN(value)) return false;
+      if (op === '>') return value > threshold;
+      if (op === '>=') return value >= threshold;
+      if (op === '<') return value < threshold;
+      if (op === '<=') return value <= threshold;
+      return value === threshold;
+    }
+
+    function evaluateRule(rule, values) {
+      const checks = rule.conditions.map(([field, label, op, value]) => ({
+        field,
+        label,
+        op,
+        value,
+        currentValue: values[field],
+        passed: compare(values[field], op, value)
+      }));
+
+      return {
+        ...rule,
+        checks,
+        matched: checks.every(check => check.passed),
+        score: checks.filter(check => check.passed).length / checks.length
+      };
+    }
+
+    function evaluate(values) {
+      const positive = positiveRules.map(rule => evaluateRule(rule, values));
+      const negative = negativeRules.map(rule => evaluateRule(rule, values));
+      const matchedPositive = positive.filter(rule => rule.matched);
+      const matchedNegative = negative.filter(rule => rule.matched);
+
+      if (matchedPositive.length) {
+        return { prediction: 1, tone: 'high', matchedRules: matchedPositive, positive, negative };
+      }
+
+      if (matchedNegative.length) {
+        return { prediction: 0, tone: 'low', matchedRules: matchedNegative, positive, negative };
+      }
+
+      return { prediction: 0, tone: 'low', matchedRules: [], positive, negative };
+    }
+
+    function fmt(value) {
+      if (value === '' || value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+      return Number(value).toLocaleString('fa-IR', { maximumFractionDigits: 3 });
+    }
+
+    function conditionText(check) {
+      return `${check.label} ${check.op} ${check.value}`;
+    }
+
+    function setProgress(id, value) {
+      const limit = fieldLimits[id];
+      const percent = Number.isNaN(value) ? 0 : ((value - limit.min) / (limit.max - limit.min)) * 100;
+      document.getElementById(id + 'Bar').style.width = Math.max(0, Math.min(100, percent)) + '%';
+    }
+
+    function renderRule(rule) {
+      const typeClass = rule.output === 1 ? 'positive' : 'negative';
+      const conditions = rule.checks.map(check => `
+        <div class="condition ${check.passed ? 'ok' : 'fail'}">
+          <span>${conditionText(check)}</span>
+          <span class="status ${check.passed ? 'ok' : 'fail'}">${check.passed ? '✓ برقرار' : '× برقرار نیست'} | مقدار: ${fmt(check.currentValue)}</span>
+        </div>
+      `).join('');
+
+      return `
+        <article class="rule-card ${rule.matched ? 'matched' : ''} ${typeClass}">
+          <div class="rule-top">
+            <div>
+              <h3>${rule.id} — ${rule.title}</h3>
+              <p>${rule.badge}</p>
+            </div>
+            <span class="rule-output">${rule.output === 1 ? 'مثبت' : 'منفی'}</span>
+          </div>
+          <div class="score-row"><span>درصد شروط برقرار</span><strong>${Math.round(rule.score * 100)}٪</strong></div>
+          <div class="progress ${rule.output === 1 ? 'danger' : ''}"><span style="width:${rule.score * 100}%"></span></div>
+          <div>${conditions}</div>
+        </article>
+      `;
+    }
+
+    function updateUI() {
+      const values = getValues();
+      const result = evaluate(values);
+      const hasMissing = inputIds.some(id => document.getElementById(id).value === '');
+      const resultCard = document.getElementById('resultCard');
+      resultCard.style.display = hasMissing ? 'none' : 'grid';
+
+      inputIds.forEach(id => {
+        const value = values[id];
+        document.getElementById(id + 'Value').textContent = fmt(value);
+        setProgress(id, value);
+      });
+
+      document.getElementById('miniGlucose').textContent = fmt(values.glucose);
+      document.getElementById('miniBmi').textContent = fmt(values.bmi);
+      document.getElementById('miniAge').textContent = fmt(values.age);
+      document.getElementById('miniDpf').textContent = fmt(values.dpf);
+
+      resultCard.className = `result-card ${result.tone === 'high' ? 'high' : 'low'}`;
+      document.getElementById('resultTitle').textContent = hasMissing ? 'ورودی‌ها را کامل کن' : 'خروجی مدل';
+      document.getElementById('resultNumber').textContent = hasMissing ? 'نامشخص' : result.prediction === 1 ? 'دیابت دارد' : 'دیابت ندارد';
+
+      const matchedList = document.getElementById('matchedList');
+      matchedList.innerHTML = result.matchedRules.length
+        ? result.matchedRules.map(rule => `<span>${rule.id} — ${rule.title}</span>`).join('')
+        : '<span>قانون فعالی وجود ندارد</span>';
+
+      renderRules();
+    }
+
+    function renderRules() {
+      const values = getValues();
+      const hasMissing = inputIds.some(id => document.getElementById(id).value === '');
+      const query = document.getElementById('ruleSearch')?.value.trim().toLowerCase() || '';
+
+      if (hasMissing) {
+        const grid = document.getElementById('rulesGrid');
+        const empty = document.getElementById('emptyState');
+        const quickRules = document.getElementById('quickRules');
+        if (grid) grid.innerHTML = '';
+        if (quickRules) quickRules.innerHTML = '';
+        if (empty) {
+          empty.textContent = 'برای نمایش قوانین فعال، ابتدا هر چهار عدد را وارد کنید.';
+          empty.style.display = 'block';
         }
+        return;
+      }
+      const evaluated = allRules.map(rule => evaluateRule(rule, values));
+      const filtered = evaluated.filter(rule => {
+        const text = [rule.id, rule.title, rule.badge, ...rule.checks.map(conditionText)].join(' ').toLowerCase();
+        const matchesQuery = !query || text.includes(query);
+        const matchesState = !onlyMatched || rule.matched;
+        return matchesQuery && matchesState;
+      });
 
-        // اعتبارسنجی رمز عبور: بین 6 تا 10 کاراکتر، شامل حروف و عدد
-        function validatePassword(value) {
-            // 1. چک کردن طول
-            if (value.length < PASSWORD_MIN_LENGTH || value.length > PASSWORD_MAX_LENGTH) {
-                return false;
-            }
-            // 2. چک کردن حداقل یک حرف (لاتین) و حداقل یک عدد
-            // عبارت باقاعده: باید حداقل شامل یک حرف لاتین (?=.*[a-zA-Z]) و حداقل شامل یک عدد (?=.*[0-9]) باشد.
-            const regex = /^(?=.*[a-zA-Z])(?=.*[0-9]).*$/;
-            
-            return regex.test(value);
-        }
+      const grid = document.getElementById('rulesGrid');
+      const empty = document.getElementById('emptyState');
+      if (grid) grid.innerHTML = filtered.map(renderRule).join('');
+      if (empty) empty.style.display = filtered.length ? 'none' : 'block';
 
-        // اعتبارسنجی فیلدهای عددی سلامت (با بازه و عدم پذیرش منفی)
-        function validateHealthField(inputElement) {
-            const value = parseFloat(inputElement.value);
-            const min = parseFloat(inputElement.getAttribute('min'));
-            const max = parseFloat(inputElement.getAttribute('max'));
-            
-            // 1. چک کردن عددی بودن
-            if (isNaN(value)) {
-                return false;
-            }
-            // 2. چک کردن بازه 
-            if (value < min || value > max) {
-                return false;
-            }
-            return true;
-        }
+      const quickRules = document.getElementById('quickRules');
+      if (quickRules) quickRules.innerHTML = evaluated.map(renderRule).join('');
+    }
 
-        // -------------------------------------------------------------------
-        // بخش احراز هویت (Authentication)
-        // -------------------------------------------------------------------
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(button.dataset.tab).classList.add('active');
+        renderRules();
+      });
+    });
 
-        function getUsersDB() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : {};
-        }
+    inputIds.forEach(id => {
+      document.getElementById(id).addEventListener('input', updateUI);
+    });
 
-        function saveUsersDB(db) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-        }
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        inputIds.forEach(id => document.getElementById(id).value = '');
+        updateUI();
+      });
+    }
 
-        function toggleAuthMode() {
-            document.getElementById('auth-message').textContent = '';
-            document.getElementById('username').classList.remove('input-error');
-            document.getElementById('password').classList.remove('input-error');
-            
-            authMode = authMode === 'login' ? 'register' : 'login';
-            updateAuthUI();
-        }
+    document.getElementById('ruleSearch').addEventListener('input', renderRules);
 
-        function updateAuthUI() {
-            const lang = document.body.getAttribute('lang');
-            const isFa = lang === 'fa';
-            
-            const title = document.getElementById('auth-title');
-            const mainBtn = document.getElementById('auth-main-btn');
-            const toggleBtn = document.getElementById('auth-toggle-btn');
-            
-            // به‌روزرسانی متن Labels بر اساس پارامترهای جدید
-            document.querySelector('label[for="username"]').textContent = isFa 
-                ? `نام کاربری (${USERNAME_MIN_LENGTH} تا ${USERNAME_MAX_LENGTH} حرف لاتین):` 
-                : `Username (${USERNAME_MIN_LENGTH} to ${USERNAME_MAX_LENGTH} Latin letters):`;
-            document.querySelector('label[for="password"]').textContent = isFa 
-                ? `رمز عبور (${PASSWORD_MIN_LENGTH} تا ${PASSWORD_MAX_LENGTH} کاراکتر، شامل حروف و عدد):` 
-                : `Password (${PASSWORD_MIN_LENGTH} to ${PASSWORD_MAX_LENGTH} chars, letters/numbers):`;
+    document.getElementById('onlyMatchedBtn').addEventListener('click', event => {
+      onlyMatched = !onlyMatched;
+      event.currentTarget.classList.toggle('primary', onlyMatched);
+      renderRules();
+    });
 
-
-            if (authMode === 'login') {
-                title.textContent = isFa ? 'ورود به سامانه ارزیابی هوشمند' : 'Smart Assessment System Login';
-                mainBtn.textContent = isFa ? 'ورود' : 'Login';
-                toggleBtn.innerHTML = isFa ? 
-                    '<span class="fa-only">حساب کاربری ندارید؟ ثبت نام کنید.</span><span class="en-only">Don\'t have an account? Register.</span>' :
-                    '<span class="fa-only">حساب کاربری ندارید؟ ثبت نام کنید.</span><span class="en-only">Don\'t have an account? Register.</span>';
-            } else { // 'register'
-                title.textContent = isFa ? 'ثبت نام کاربر جدید' : 'New User Registration';
-                mainBtn.textContent = isFa ? 'ثبت نام' : 'Register';
-                toggleBtn.innerHTML = isFa ? 
-                    '<span class="fa-only">قبلاً ثبت نام کرده‌اید؟ ورود کنید.</span><span class="en-only">Already registered? Login.</span>' :
-                    '<span class="fa-only">قبلاً ثبت نام کرده‌اید؟ ورود کنید.</span><span class="en-only">Already registered? Login.</span>';
-            }
-        }
-
-        function handleAuth() {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value; 
-            const msg = document.getElementById('auth-message');
-            const db = getUsersDB();
-            const lang = document.body.getAttribute('lang');
-            
-            msg.style.color = 'var(--danger-color)';
-            usernameInput.classList.remove('input-error');
-            passwordInput.classList.remove('input-error');
-            
-            // اعتبارسنجی نام کاربری
-            if (!validateUsername(username)) {
-                usernameInput.classList.add('input-error');
-                msg.textContent = lang === 'fa' ? 
-                    `نام کاربری باید بین ${USERNAME_MIN_LENGTH} تا ${USERNAME_MAX_LENGTH} کاراکتر و فقط شامل حروف لاتین باشد.` : 
-                    `Username must be between ${USERNAME_MIN_LENGTH} and ${USERNAME_MAX_LENGTH} Latin letters only.`;
-                return;
-            }
-            
-            // اعتبارسنجی رمز عبور
-            if (!validatePassword(password)) {
-                passwordInput.classList.add('input-error');
-                msg.textContent = lang === 'fa' ? 
-                    `رمز عبور باید بین ${PASSWORD_MIN_LENGTH} تا ${PASSWORD_MAX_LENGTH} کاراکتر باشد و حتماً شامل حروف و عدد باشد.` : 
-                    `Password must be between ${PASSWORD_MIN_LENGTH} and ${PASSWORD_MAX_LENGTH} characters and must include both letters and numbers.`;
-                return;
-            }
-
-            // --- ادامه منطق ورود/ثبت نام ---
-            if (authMode === 'login') {
-                if (db[username] && db[username] === password) {
-                    msg.style.color = 'var(--secondary-color)';
-                    msg.textContent = lang === 'fa' ? `ورود موفقیت‌آمیز، خوش آمدید ${username}!` : `Login successful, welcome ${username}!`;
-                    document.getElementById('auth-screen').style.display = 'none';
-                    document.getElementById('prediction-dashboard').style.display = 'block';
-                } else {
-                    msg.textContent = lang === 'fa' ? 'نام کاربری یا رمز عبور اشتباه است.' : 'Incorrect username or password.';
-                }
-            } else {
-                if (db[username]) {
-                    usernameInput.classList.add('input-error');
-                    msg.textContent = lang === 'fa' ? 'این نام کاربری قبلاً ثبت شده است.' : 'This username is already taken.';
-                } else {
-                    db[username] = password;
-                    saveUsersDB(db);
-                    msg.style.color = 'var(--secondary-color)';
-                    msg.textContent = lang === 'fa' ? 'ثبت نام موفقیت‌آمیز. اکنون وارد شوید.' : 'Registration successful. Please login now.';
-                    authMode = 'login';
-                    updateAuthUI();
-                }
-            }
-        }
-
-        // -------------------------------------------------------------------
-        // بخش رابط کاربری و زبان (UI/Language)
-        // -------------------------------------------------------------------
-
-        function setLanguage(lang) {
-            document.body.setAttribute('lang', lang);
-            
-            // 1. تغییر متون غیر Placeholder
-            document.querySelectorAll('[data-lang-fa], [data-lang-en]').forEach(element => {
-                const faText = element.getAttribute('data-lang-fa');
-                const enText = element.getAttribute('data-lang-en');
-                
-                if (lang === 'fa' && faText) {
-                    if (element.tagName.toLowerCase() !== 'label') {
-                        element.textContent = faText;
-                    }
-                } else if (lang === 'en' && enText) {
-                    if (element.tagName.toLowerCase() !== 'label') {
-                        element.textContent = enText;
-                    }
-                }
-            });
-
-            // 2. تغییر Placeholderها
-            document.querySelectorAll('input[type="number"], input[type="text"], input[type="password"]').forEach(input => {
-                const faPlaceholder = input.getAttribute('data-placeholder-fa');
-                const enPlaceholder = input.getAttribute('data-placeholder-en');
-
-                if (lang === 'fa' && faPlaceholder) {
-                    input.setAttribute('placeholder', faPlaceholder);
-                } else if (lang === 'en' && enPlaceholder) {
-                    input.setAttribute('placeholder', enPlaceholder);
-                }
-            });
-            
-            // 3. به‌روزرسانی UI بخش ورود/ثبت نام (شامل لیبل‌ها)
-            updateAuthUI();
-        }
-
-        function toggleLanguage() {
-            const currentLang = document.body.getAttribute('lang');
-            const newLang = currentLang === 'fa' ? 'en' : 'fa';
-            setLanguage(newLang);
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-
-        // -------------------------------------------------------------------
-        // بخش ارزیابی سلامت (Assessment)
-        // -------------------------------------------------------------------
-
-        // منطق اصلی قواعد (بدون تغییر)
-        function checkRules(glucose, bmi, age, dpf) {
-            
-            let finalPrediction = 0.0;
-            // Rule 1 for 1.0
-            if (glucose > 101 && glucose <= 154 && bmi > 43.300 && age > 29) { finalPrediction = 1.0; }
-            // Rule 2 for 1.0
-            if (finalPrediction !== 1.0 && glucose > 154) { finalPrediction = 1.0; }
-            // Rule 3 for 1.0
-            if (finalPrediction !== 1.0 && glucose > 101 && bmi > 26.700 && dpf > 0.464 && age > 29) { finalPrediction = 1.0; }
-
-            if (finalPrediction === 1.0) { return 1.0; }
-
-            // Rule 1 for 0.0
-            if (glucose <= 154 && bmi <= 26.700) { finalPrediction = 0.0; }
-            // Rule 2 for 0.0
-            if (finalPrediction !== 0.0 && glucose <= 101) { finalPrediction = 0.0; }
-            // Rule 3 for 0.0
-            if (finalPrediction !== 0.0 && glucose <= 154 && age <= 29) { finalPrediction = 0.0; }
-            // Rule 4 for 0.0
-            if (finalPrediction !== 0.0 && dpf > 0.287 && dpf <= 0.307) { finalPrediction = 0.0; }
-            // Rule 5 for 0.0
-            if (finalPrediction !== 0.0 && glucose <= 154 && bmi <= 43.300 && dpf <= 0.464) { finalPrediction = 0.0; }
-            
-            return finalPrediction; 
-        }
-
-        function updateRiskGauge(prediction) {
-            const riskBar = document.getElementById('risk-level-bar');
-            const finalText = document.getElementById('final-text');
-            const lang = document.body.getAttribute('lang');
-            
-            if (prediction === 1.0) {
-                riskBar.style.width = '90%';
-                riskBar.textContent = lang === 'fa' ? 'خطر بالا' : 'High Risk'; 
-                finalText.innerHTML = lang === 'fa' ? 
-                    '🔴 **ریسک بالا (۱.۰)**: نیاز به مشاوره متخصص.' : 
-                    '🔴 **High Risk (1.0)**: Specialist consultation required.';
-            } else {
-                riskBar.style.width = '20%';
-                riskBar.textContent = lang === 'fa' ? 'ایمن' : 'Safe'; 
-                finalText.innerHTML = lang === 'fa' ? 
-                    '🟢 **ریسک پایین (۰.۰)**: وضعیت خوب ارزیابی شده است.' : 
-                    '🟢 **Low Risk (0.0)**: Status assessed as good.';
-            }
-        }
-
-        function calculatePrediction() {
-            const inputs = {
-                glucose: document.getElementById('input_glucose'),
-                bmi: document.getElementById('input_bmi'),
-                dpf: document.getElementById('input_dpf'),
-                age: document.getElementById('input_age')
-            };
-
-            const resultContainer = document.getElementById('risk-result-container');
-            const finalP = document.getElementById('final-text');
-            const lang = document.body.getAttribute('lang');
-            let allValid = true;
-
-            // 1. اعتبارسنجی فیلدهای سلامت
-            for (const key in inputs) {
-                inputs[key].classList.remove('input-error'); 
-                if (!validateHealthField(inputs[key])) {
-                    inputs[key].classList.add('input-error');
-                    allValid = false;
-                }
-            }
-
-            if (!allValid) {
-                resultContainer.style.display = 'block';
-                const errorMsg = lang === 'fa' ? 
-                    '❌ **خطای ورودی:** لطفاً مقادیر هایلایت شده را در بازه مجاز و غیرمنفی وارد کنید.' : 
-                    '❌ **Input Error:** Please enter the highlighted values as non-negative numbers within the valid range.';
-                finalP.innerHTML = errorMsg;
-                document.getElementById('risk-level-bar').style.width = '0%';
-                document.getElementById('risk-level-bar').textContent = '';
-                return;
-            }
-
-            // 2. اگر همه معتبر بودند، اجرای منطق قواعد
-            const glucose = parseFloat(inputs.glucose.value);
-            const bmi = parseFloat(inputs.bmi.value);
-            const dpf = parseFloat(inputs.dpf.value);
-            const age = parseInt(inputs.age.value);
-
-            const prediction = checkRules(glucose, bmi, age, dpf);
-
-            // 3. نمایش بخش نتایج و نمودار
-            resultContainer.style.display = 'block';
-            updateRiskGauge(prediction);
-        }
-
-        // -------------------------------------------------------------------
-        // بخش راه‌اندازی
-        // -------------------------------------------------------------------
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(document.body.getAttribute('lang'));
-        });
-    </script>
-
+    updateUI();
+  </script>
 </body>
 </html>
