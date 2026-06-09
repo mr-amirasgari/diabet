@@ -121,3 +121,7 @@ After logging in, enter the four health parameters:
 ## 🧑‍💻 Contributing
 
 This project is intended as an educational/demo piece. Suggestions for improving the structure, styling, or logic are welcome via Issues or Pull Requests.
+---
+
+Created by **Amir Mohammad Asgari | امیرمحمد عسگری**  
+Official website: [https://www.am-asgari.ir/](https://www.am-asgari.ir/)
